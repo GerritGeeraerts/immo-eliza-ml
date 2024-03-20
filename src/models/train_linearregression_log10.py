@@ -22,12 +22,22 @@ base_pipeline = Pipeline([
 df = base_pipeline.transform(df)
 
 pipeline = Pipeline([
-    ('Min Max scaler', MyMinMaxScaler(columns=['Habitable Surface'])),
+    ('Min Max scaler', MyMinMaxScaler(
+        columns=['Land Surface', 'Habitable Surface', 'Bathroom Count', 'Toilet Count', 'Postal Code', 'Longitude',
+                 'Latitude', 'Facades', 'Subtype', 'Consumption', 'State of Building', 'Kitchen Type'],
+        multipliers={'Subtype': 100}  # make Subtype dominant for KNN
+    )),
     ('KNN toilets', MyKNNImputer(columns=['Habitable Surface', 'Bathroom Count', 'Toilet Count'])),
     ('KNN Lon, Lat', MyKNNImputer(columns=['Postal Code', 'Longitude', 'Latitude'])),
     ('KNN Facade', MyKNNImputer(columns=['Facades', 'Land Surface', 'Habitable Surface', 'Subtype'])),
-    ('KNN Consumption', MyKNNImputer(columns=['Consumption', 'State of Building', 'Kitchen Type'])),
+    ('KNN Consumption', MyKNNImputer(columns=['Consumption', 'State of Building', 'Kitchen Type', 'Subtype'])),
 ])
+
+# a scatter plot with plotly price and Consumption
+# fig = px.scatter(df, x='Consumption', y='Price')
+# fig.show()
+#
+# exit()
 
 X = df.drop(columns=['Price'])
 y = df['Price']
