@@ -1,7 +1,7 @@
 # Model card
 
 ## Remark
-.pkl file is not in the repository because it is too big. You can runt the train_random_forest.py file 
+`random_forest.pkl` file is not in the repository because it is too big. You can runt the train_random_forest.py file 
 to generate the model.
 
 ## Project context
