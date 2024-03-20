@@ -23,8 +23,8 @@ base_pipeline = Pipeline([
 df = base_pipeline.transform(df)
 
 pipeline = Pipeline([
-    ('Min Max scaler', MyMinMaxScaler(columns=['Habitable Surface'])),
-    ('KNN toilets', MyKNNImputer(columns=['Habitable Surface', 'Bathroom Count', 'Toilet Count'])),
+    ('Min Max Scaler', MyMinMaxScaler(columns=['Habitable Surface'])),
+    ('KNN Toilets', MyKNNImputer(columns=['Habitable Surface', 'Bathroom Count', 'Toilet Count', 'Subtype'])),
     ('KNN Lon, Lat', MyKNNImputer(columns=['Postal Code', 'Longitude', 'Latitude'])),
     ('KNN Facade', MyKNNImputer(columns=['Facades', 'Land Surface', 'Habitable Surface', 'Subtype'])),
     ('KNN Consumption', MyKNNImputer(columns=['Consumption', 'State of Building', 'Kitchen Type'])),
@@ -37,7 +37,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=41, test_
 
 X_train = pipeline.fit_transform(X_train)
 
-random_forest_model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=6)
+random_forest_model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=20)
 
 random_forest_model.fit(X_train, y_train)
 

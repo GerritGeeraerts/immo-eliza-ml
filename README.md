@@ -16,8 +16,8 @@ I will apply Linear Regression together with Charlie 🦀 to predict the price o
 ├── assets
 ├── data
 │   └── raw
-│       └── data.csv
-├── models
+│       └── data.csv  # the raw data
+├── models  # the trained models
 │   ├── basic_linearregression.pkl
 │   ├── linearregression_log10.pkl
 │   └── random_forest.pkl
@@ -26,12 +26,12 @@ I will apply Linear Regression together with Charlie 🦀 to predict the price o
 └── src
     ├── config.py
     ├── features
-    │   ├── build_features.py
-    │   └── transformers.py
-    ├── models
-    │   ├── model_utils.py
-    │   ├── pipeline.py
-    │   ├── train_basic_linearregression.py
+    │   ├── build_features.py  # add new features
+    │   └── transformers.py  # transform features
+    ├── models  # train models
+    │   ├── model_utils.py 
+    │   ├── pipeline.py  # base pipeline
+    │   ├── train_basic_linearregression.py  
     │   ├── train_linearregression_log10.py
     │   └── train_random_forest.py
     └── utils.py
