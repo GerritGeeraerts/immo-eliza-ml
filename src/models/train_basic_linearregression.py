@@ -8,7 +8,7 @@ from sklearn.pipeline import Pipeline
 from features.transformers import MyMinMaxScaler, MyKNNImputer
 from models.model_utils import save_model_as_pickle
 from models.pipeline import base_pipeline
-from utils import load_data
+from utils import load_data, visualize_metrics
 
 df = load_data()
 
@@ -20,13 +20,14 @@ base_pipeline = Pipeline([
 pipeline = Pipeline([
     ('Min Max scaler', MyMinMaxScaler(
         columns=['Land Surface', 'Habitable Surface', 'Bathroom Count', 'Toilet Count', 'Postal Code', 'Longitude',
-                 'Latitude', 'Facades', 'Subtype', 'Consumption', 'State of Building', 'Kitchen Type'],
+                 'Latitude', 'Facades', 'Subtype', 'Consumption', 'State of Building', 'Kitchen Type', 'cd_munty_refnis','PopDensity','MedianPropertyValue','NetIncomePerResident'],
         multipliers={'Subtype': 100}  # make Subtype dominant for KNN
     )),
     ('KNN toilets', MyKNNImputer(columns=['Habitable Surface', 'Bathroom Count', 'Toilet Count'])),
     ('KNN Lon, Lat', MyKNNImputer(columns=['Postal Code', 'Longitude', 'Latitude'])),
     ('KNN Facade', MyKNNImputer(columns=['Facades', 'Land Surface', 'Habitable Surface', 'Subtype'])),
     ('KNN Consumption', MyKNNImputer(columns=['Consumption', 'State of Building', 'Kitchen Type', 'Subtype'])),
+    ('KNN REFNIS blanks', MyKNNImputer(columns=['Longitude', 'Latitude', 'cd_munty_refnis','PopDensity','MedianPropertyValue','NetIncomePerResident'])),
 ])
 
 df = base_pipeline.transform(df)
@@ -60,3 +61,5 @@ print(f"{os.path.basename(__file__)} - r_squared: {r_squared:.2%}")
 
 # save the model
 save_model_as_pickle(reg_model, os.path.basename(__file__))
+
+visualize_metrics(r_squared, y_test, y_pred)

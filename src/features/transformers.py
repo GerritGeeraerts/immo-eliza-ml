@@ -233,6 +233,7 @@ class MyOrdinalEncoder(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return X
 
+
 class BuildingStateOrdinalEncoder(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.building_state_map = {
@@ -255,6 +256,7 @@ class BuildingStateOrdinalEncoder(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return X
 
+
 class ConsumptionFixer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
@@ -269,6 +271,7 @@ class ConsumptionFixer(BaseEstimator, TransformerMixin):
             "F": 550,
             "G": 650,
         }
+
         def replace_value(x):
             for k, v in epc_map.items():
                 if str(k) in str(x):

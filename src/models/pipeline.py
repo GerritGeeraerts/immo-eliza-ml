@@ -7,7 +7,7 @@ BASE_SUBTYPES_TO_KEEP = ['VILLA', 'HOUSE', 'APARTMENT', ]
 BASE_COLUMNS_TO_KEEP = [
     'Bathroom Count', 'Bedroom Count', 'Habitable Surface', 'Land Surface', 'Consumption', 'Postal Code',
     'Facades', 'Subtype', 'Toilet Count', 'Kitchen Type', 'State of Building',  # 'Sea view', 'Swimming Pool',
-    'Price', 'Longitude', 'Latitude', 'EPC',
+    'Price', 'Longitude', 'Latitude', 'EPC', 'cd_munty_refnis', 'PopDensity', 'MedianPropertyValue', 'NetIncomePerResident'
 ]
 REQUIRED_COLUMNS = [
     'Habitable Surface', 'Land Surface', 'Price', 'Subtype', 'Bedroom Count', 'Postal Code', 'Bathroom Count',
@@ -41,7 +41,12 @@ building_state_map = {
     "TO_RENOVATE": 1,
     "TO_RESTORE": 0,
 }
-subtype_map = {'VILLA': 3, 'HOUSE': 2, 'APARTMENT': 1}
+subtype_map = {
+    'VILLA': 3,
+    'HOUSE': 2,
+    'APARTMENT': 1
+
+}
 
 base_pipeline = Pipeline([
     ('Fill Land Surface for APARTMENT', FillLandSurfaceForApartment()),

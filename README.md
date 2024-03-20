@@ -13,10 +13,19 @@ I will apply Linear Regression together with Charlie 🦀 to predict the price o
 
 ## 📦 Repo structure
 ```
-├── assets
+├── assets  # some images
 ├── data
+│   ├── external_data
+│   │   ├── HouseholdIncome.xlsx
+│   │   ├── PopDensity.xlsx
+│   │   ├── PropertyValue.xlsx  
+│   │   ├── REFNIS_CODES.geojson  # download this file!! Look below for more info
+│   │   └── REFNIS_Mapping.xlsx  
+│   ├── intermediate
+│   │   └── joined_data.csv  # joining external data with the scraped data
 │   └── raw
-│       └── data.csv  # the raw data
+│       └── data.csv
+├── MODELCARD.md
 ├── models  # the trained models
 │   ├── basic_linearregression.pkl
 │   ├── linearregression_log10.pkl
@@ -25,42 +34,59 @@ I will apply Linear Regression together with Charlie 🦀 to predict the price o
 ├── requirements.txt
 └── src
     ├── config.py
-    ├── features
-    │   ├── build_features.py  # add new features
-    │   └── transformers.py  # transform features
-    ├── models  # train models
-    │   ├── model_utils.py 
-    │   ├── pipeline.py  # base pipeline
-    │   ├── train_basic_linearregression.py  
+    ├── features  # building and transforming features
+    │   ├── build_features.py
+    │   └── transformers.py
+    ├── models  # training the models and some model utils
+    │   ├── model_utils.py
+    │   ├── pipeline.py
+    │   ├── train_basic_linearregression.py
     │   ├── train_linearregression_log10.py
     │   └── train_random_forest.py
-    └── utils.py
+    └── utils.py  # generic utils
 ```
 
 ## 🚀 To retrain a model
+### Copy external data
+Go to [statbel.fgov.be](https://statbel.fgov.be/nl/open-data/statistische-sectoren-2023) to download the latest 
+geojson (ZIP), extract the file and copy the `sh_statbel_statistical_sectors_31370_20230101.geojson` file and copy it 
+to `./data/external_data/REFNIS_2023.geojson`
+### install requirements
 Before charlie can predict the price of a house, we need to install the requirements.
 ```bash
-# install requirements
 pip install -r requirements.txt
 ```
-
+### Train a model
 Now Charlie is all set and ready to be trained. To train a model, run the following command in the terminal:
 ```bash
-# change directory to source root folder
-cd src
+cd src # move to the src folder
 
 # train a model
-python ./models/train_basic_linearregression.py # or the name of a different model
+python ./models/train_basic_linearregression.py
+# or
+python ./models/train_linearregression_log10.py
+# or
+python ./models/train_random_forest.py
 ```
 Charlie will print an R-squared score and save the model in the models folder with a similar name as the train_model.py 
 file.
 ## Screenshot
+### Basic Linear regression model
+![basic linear](./assets/basic_linear.png)
+### Advanced Linear regression model
+![advanced linear](./assets/linear_log_10.png)
+### Random Forest model
+![random forest](./assets/random_forest.png)
+[More data about all the above models](./MODELCARD.md)
 
 ## ⏱️ Timeline
 This project was done in 4 days including studying the theory and implementing the code.
 
 ## 📌 Personal Situation
 This project was done as part of my AI trainee program at BeCode.
+
+## 📚 Credits
+Thank you at Bear Revels for providing the external datasets, which boosted my scores!
 
 ### Connect with me!
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gerrit-geeraerts-143488141)
