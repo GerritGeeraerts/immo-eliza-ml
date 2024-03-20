@@ -37,7 +37,7 @@ def visualize_metrics(r_squared, y_test, y_pred, comments=""):
 
     if comments:
         plt.text(0.5, -0.1, f"Comments: {comments}", horizontalalignment='center', verticalalignment='center',
-                 transform=ax[2].transAxes, bbox=dict(facecolor='white', alpha=0.5))
+                 transform=ax[1].transAxes, bbox=dict(facecolor='white', alpha=0.5))
 
     plt.tight_layout()
     plt.show()

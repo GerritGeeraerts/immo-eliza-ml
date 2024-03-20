@@ -36,10 +36,10 @@ I will apply Linear Regression together with Charlie 🦀 to predict the price o
     ├── config.py
     ├── features  # building and transforming features
     │   ├── build_features.py
+    ├   ├── pipeline.py
     │   └── transformers.py
     ├── models  # training the models and some model utils
     │   ├── model_utils.py
-    │   ├── pipeline.py
     │   ├── train_basic_linearregression.py
     │   ├── train_linearregression_log10.py
     │   └── train_random_forest.py

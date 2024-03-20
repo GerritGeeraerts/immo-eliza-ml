@@ -1,7 +1,7 @@
 from sklearn.pipeline import Pipeline
 
 from features.transformers import RowFilter, DropNARows, ColumnSelector, ResetIndexTransformer, \
-    FillLandSurfaceForApartment, FacadeFixer, ConsumptionFixer, MyOrdinalEncoder
+    FillLandSurfaceForApartment, FacadeFixer, ConsumptionFixer, MyOrdinalEncoder, MyMinMaxScaler, MyKNNImputer
 
 BASE_SUBTYPES_TO_KEEP = ['VILLA', 'HOUSE', 'APARTMENT', ]
 BASE_COLUMNS_TO_KEEP = [
@@ -44,8 +44,7 @@ building_state_map = {
 subtype_map = {
     'VILLA': 3,
     'HOUSE': 2,
-    'APARTMENT': 1
-
+    'APARTMENT': 1,
 }
 
 base_pipeline = Pipeline([
@@ -61,4 +60,21 @@ base_pipeline = Pipeline([
     ('Subtype to numeric', MyOrdinalEncoder('Subtype', subtype_map)),
     ('Consumption fixer', ConsumptionFixer()),
     ('Drop EPC', ColumnSelector(drop_columns=['EPC'])),
+])
+
+base_after_split_pipeline = Pipeline([
+    ('Min Max scaler', MyMinMaxScaler(
+        columns=['Land Surface', 'Habitable Surface', 'Bathroom Count', 'Toilet Count', 'Postal Code', 'Longitude',
+                 'Latitude', 'Facades', 'Subtype', 'Consumption', 'State of Building', 'Kitchen Type',
+                 'cd_munty_refnis', 'PopDensity', 'MedianPropertyValue', 'NetIncomePerResident'],
+        multipliers={'Subtype': 100}  # make Subtype dominant for KNN
+    )),
+    ('KNN Toilets', MyKNNImputer(columns=['Habitable Surface', 'Bathroom Count', 'Toilet Count', 'Subtype'])),
+    ('KNN Lon, Lat', MyKNNImputer(columns=['Postal Code', 'Longitude', 'Latitude'])),
+    ('KNN Facade', MyKNNImputer(columns=['Facades', 'Land Surface', 'Habitable Surface', 'Subtype'])),
+    ('KNN Consumption', MyKNNImputer(columns=['Consumption', 'State of Building', 'Kitchen Type', 'Subtype'])),
+    ('KNN REFNIS blanks', MyKNNImputer(
+        columns=['Longitude', 'Latitude', 'cd_munty_refnis', 'PopDensity', 'MedianPropertyValue',
+                 'NetIncomePerResident']
+    )),
 ])
