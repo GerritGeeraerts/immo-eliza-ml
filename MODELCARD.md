@@ -50,15 +50,21 @@ It has a really great score on the training data itself and should be further te
 to see if it is overwriting or not.
 
 ## Usage
-### Install requirements
-Go to [statbel.fgov.be](https://statbel.fgov.be/nl/open-data/statistische-sectoren-2023) to download the latest 
-geojson (ZIP), extract the file and copy the `sh_statbel_statistical_sectors_31370_20230101.geojson` file and copy it 
-to `./data/external_data/REFNIS_2023.geojson`
-
+### install requirements
+Before charlie can predict the price of a house, we need to install the requirements.
 ```bash
 pip install -r requirements.txt
 ```
-
+### OPTIONAL: Update external data
+If you want to update the external data, you can download the latest data from the following links:
+Go to [statbel.fgov.be](https://statbel.fgov.be/nl/open-data/statistische-sectoren-2023) to download the latest 
+geojson (ZIP), extract the file and copy the `sh_statbel_statistical_sectors_31370_20230101.geojson` file and copy it 
+to `./data/external_data/REFNIS_2023.geojson`
+and run the following command in the terminal:
+```bash
+cd src # move to the src folder
+python join_external_data.py
+```
 ### train a model
 It best to move to root src folder before running the train model file.
 ```bash

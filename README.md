@@ -52,7 +52,7 @@ Before charlie can predict the price of a house, we need to install the requirem
 ```bash
 pip install -r requirements.txt
 ```
-### Update external data - Optional
+### OPTIONAL: Update external data
 If you want to update the external data, you can download the latest data from the following links:
 Go to [statbel.fgov.be](https://statbel.fgov.be/nl/open-data/statistische-sectoren-2023) to download the latest 
 geojson (ZIP), extract the file and copy the `sh_statbel_statistical_sectors_31370_20230101.geojson` file and copy it 
@@ -62,8 +62,6 @@ and run the following command in the terminal:
 cd src # move to the src folder
 python join_external_data.py
 ```
-
-
 ### Train a model
 Now Charlie is all set and ready to be trained. To train a model, run the following command in the terminal:
 ```bash
