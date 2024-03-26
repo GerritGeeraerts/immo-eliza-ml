@@ -2,12 +2,12 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from shapely import Point
 
-from config import joined_data_path
+from config import joined_data_path, raw_data_path
 import geopandas as gpd
 
 
 def load_data(path=None):
-    path = path if path else joined_data_path
+    path = path if path else raw_data_path
     df = pd.read_csv(path, low_memory=False)
     return df
 
@@ -96,8 +96,32 @@ def join_data(raw_data):
     return joined_data
 
 
+def split_file(filename, part_size_mb=100):
+    """Splits a file into multiple parts each not exceeding part_size_mb."""
+    part_num = 0
+    part_size_bytes = part_size_mb * 1024 * 1024  # Convert MB to bytes
+
+    with open(filename, 'rb') as f:
+        while True:
+            chunk = f.read(part_size_bytes)
+            if not chunk:
+                break  # End of file
+            part_num += 1
+            part_filename = f"{filename}.part{part_num}"
+            with open(part_filename, 'wb') as part_file:
+                part_file.write(chunk)
+            print(f"Created {part_filename}")
+
+
+def join_files(original_filename, num_parts):
+    """Joins files split by split_file into their original file."""
+    with open(original_filename, 'wb') as output_file:
+        for part_num in range(1, num_parts + 1):
+            part_filename = f"{original_filename}.part{part_num}"
+            with open(part_filename, 'rb') as part_file:
+                output_file.write(part_file.read())
+            print(f"Added {part_filename} to {original_filename}")
+
+
 if __name__ == '__main__':
-    df = load_data()
-    df = join_data(df)
-    print(df.head())
-    print(df.columns)
+    join_files('../models/random_forest.pkl', num_parts=3)
