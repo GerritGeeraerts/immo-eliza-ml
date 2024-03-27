@@ -1,2 +1,3 @@
 models/random_forest.pkl
 data/external_data/REFNIS_CODES.geojson
+src/models/catboost_info/

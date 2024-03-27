@@ -2,8 +2,9 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 from sklearn.impute import KNNImputer
-from sklearn.preprocessing import MinMaxScaler
-
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.base import BaseEstimator, RegressorMixin
+from catboost import CatBoostRegressor
 
 class RowFilter(BaseEstimator, TransformerMixin):
     """
@@ -60,7 +61,9 @@ class ResetIndexTransformer(BaseEstimator, TransformerMixin):
         return self  # Nothing to do here
 
     def transform(self, X):
-        return X.reset_index(drop=self.drop)
+        X_copy = X.copy()
+        X_copy.reset_index(drop=self.drop, inplace=True)
+        return X_copy
 
     def inverse_transform(self, X):
         return X
@@ -145,9 +148,6 @@ class Log10Transformer(BaseEstimator, TransformerMixin):
         return X_transformed
 
     def inverse_transform(self, X):
-        return X
-
-    def inverse_transform(self, X):
         X_reversed = X.copy()
         if self.columns is not None:
             for col in self.columns:
@@ -160,58 +160,51 @@ class Log10Transformer(BaseEstimator, TransformerMixin):
 
 
 class MyMinMaxScaler(BaseEstimator, TransformerMixin):
-    def __init__(self, columns, multipliers=None):
-        multipliers = multipliers if multipliers else {}
-        for key in multipliers.keys():
-            if key not in columns:
-                raise ValueError(f"The Multiplier {key} was not in columns")
+    def __init__(self, columns, feature_range=(0, 1)):
         self.column_scalers = {}
+        self.column_types = {}
         for column in columns:
-            multiplier = multipliers[column] if column in multipliers else 1
-            self.column_scalers[column] = MinMaxScaler(feature_range=(0, multiplier))
+            self.column_scalers[column] = MinMaxScaler(feature_range=feature_range)
 
     def fit(self, X, y=None):
         for column, scaler in self.column_scalers.items():
             self.column_scalers[column].fit(X[[column]])
+            self.column_types[column] = X[column].dtype
         self.column_names = X.columns
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X):
         X_copy = X.copy()
         for column, scaler in self.column_scalers.items():
             X_copy[column] = scaler.transform(X_copy[[column]])
+        X_copy = pd.DataFrame(X_copy, columns=self.column_names)
         return X_copy
 
-    def inverse_transform(self, df_scaled):
-        df_scaled = df_scaled.copy()
+    def inverse_transform(self, X):
+        X_copy = X.copy()
         for column, scaler in self.column_scalers.items():
-            df_scaled[column] = scaler.inverse_transform(df_scaled[[column]])
-
-        return df_scaled
+            scaled_data = scaler.inverse_transform(X_copy[[column]])
+            if self.column_types[column].kind in ['i', 'u']:  # Check if type is integer or unsigned integer
+                scaled_data = np.round(scaled_data).astype(self.column_types[column])  # Round and convert to original type
+            X_copy[column] = scaled_data
+        X_copy = pd.DataFrame(X_copy, columns=self.column_names)
+        return X_copy
 
 
 class MyKNNImputer(BaseEstimator, TransformerMixin):
-    def __init__(self, columns, n_neighbors=5, **kwargs):
-        self.columns = columns
+    def __init__(self, columns, n_neighbors=5):
+        self.columns_to_impute = columns
         self.n_neighbors = n_neighbors
-        self.imputer = KNNImputer(n_neighbors=n_neighbors, **kwargs)
-        self.kwargs = kwargs
+        self.imputer = KNNImputer(n_neighbors=n_neighbors)
 
     def fit(self, X, y=None):
-        # Ensure X is a DataFrame for column indexing
-        X = pd.DataFrame(X)
-        self.imputer.fit(X[self.columns])
+        self.imputer.fit(X[self.columns_to_impute])
         return self
 
     def transform(self, X):
-        # Ensure X is a DataFrame for column indexing
-        X = pd.DataFrame(X)
-        # Impute the specified columns
-        X[self.columns] = self.imputer.transform(X[self.columns])
-        return X
-
-    def fit_transform(self, X, y=None):
-        return self.fit(X, y).transform(X)
+        X_copy = X.copy()
+        X_copy[self.columns_to_impute] = self.imputer.transform(X_copy[self.columns_to_impute])
+        return X_copy
 
     def inverse_transform(self, X):
         return X
@@ -292,3 +285,96 @@ class ConsumptionFixer(BaseEstimator, TransformerMixin):
 
     def inverse_transform(self, X):
         return X
+
+
+class InverseScaler(BaseEstimator, TransformerMixin):
+    def __init__(self, scaler):
+        self.scaler = scaler
+
+    def fit(self, X, y=None):
+        return self  # Nothing to do here
+
+    def transform(self, X):
+        # Assuming X is scaled between 0 and 1, invert the scaling
+        return self.scaler.inverse_transform(X)
+
+
+class MyStandardScaler(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.scaler = StandardScaler()
+
+    def fit(self, X, y=None):
+        print('Fitting Standard Scaler')
+        self.scaler.fit(X)
+        return self
+
+    def transform(self, X):
+        print('Transforming with Standard Scaler')
+        X_copy = X.copy()
+        X_copy = self.scaler.transform(X_copy)
+        return X_copy
+
+    def inverse_transform(self, X):
+        X_copy = X.copy()
+        X_copy = self.scaler.inverse_transform(X_copy)
+        return X_copy
+
+
+
+
+
+class CatBoostRegressorWrapper(BaseEstimator, RegressorMixin):
+    """
+    CatbootRegressor's fit function accepts parameters, but when you use CatBoostRegressor in a pipeline,
+    you can't pass these parameters to the fit function. So when you create a CatBoostRegressorWrapper,
+    you can pass the parameters to the fit_params parameter of the constructor, and they will be passed to
+    the fit function.
+    """
+    def __init__(self, fit_params: dict = None, **kwargs):
+        self.fit_params = fit_params if fit_params else {}
+        self.model = CatBoostRegressor(**kwargs)
+
+    def fit(self, X, y=None):
+        self.model.fit(X, y, **self.fit_params)
+        return self
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def transform(self, X, y=None):
+        return X
+
+    def inverse_transform(self, X):
+        return X
+class NaNToCategoryTransformer(BaseEstimator, TransformerMixin):
+    """
+    A custom transformer that replaces NaN values in specified non-numerical columns
+    (or all non-numerical columns if none are specified) with a specified value,
+    defaulting to 'missing'.
+    """
+    def __init__(self, replacement='missing', columns=None):
+        self.replacement = replacement
+        self.columns_to_impute = columns
+
+    def fit(self, X, y=None):
+        categorical_columns = X.select_dtypes(include=['object', 'category']).columns
+        # If no columns are specified, use all non-numerical columns
+        if not self.columns_to_impute:
+            self.columns_to_impute = categorical_columns
+            return self
+
+        # Check if all specified columns are categorical
+        for col in self.columns_to_impute:
+            if col not in categorical_columns:
+                raise ValueError(f"Column '{col}' is not a categorical column")
+
+        return self
+
+    def transform(self, X):
+        X_copy = X.copy()
+        X_copy[self.columns_to_impute] = X_copy[self.columns_to_impute].fillna(self.replacement)
+        return X_copy
+
+    def inverse_transform(self, X):
+        return X
+

@@ -15,4 +15,4 @@ def save_model_as_pickle(model, python_script_file_name: str):
     file_name = python_script_file_name.replace('.py', '').replace('train_', '')
     file_path = os.path.join(base_path_models, file_name + '.pkl')
     with open(file_path, 'wb') as file:
-        pickle.dump(model, file)
+        pickle.dump(model, file,)
